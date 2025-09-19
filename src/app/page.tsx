@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 export default function Home() {
-  const { t, isRTL } = useLanguage();
+  const { t } = useLanguage();
   return (
     <div className="min-h-screen">
       {/* Translation Test - Remove this after testing */}

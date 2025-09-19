@@ -34,7 +34,7 @@ import { useLanguage } from '@/contexts/language-context';
 export function Navbar() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { t, isRTL } = useLanguage();
+  const { t } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 

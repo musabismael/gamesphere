@@ -55,7 +55,7 @@ export function getFontClass(language: SupportedLanguage): string {
 
 // Translation system
 export type TranslationKey = string;
-export type TranslationObject = Record<string, any>;
+export type TranslationObject = Record<string, unknown>;
 
 // Import translation files
 import enTranslations from './translations/en.json';
@@ -81,17 +81,17 @@ export function getTranslation(
   fallback?: string
 ): string {
   const keys = key.split('.');
-  let value: any = translations[language] || translations['en'];
+  let value: unknown = translations[language] || translations['en'];
   
   for (const k of keys) {
-    if (value && typeof value === 'object' && k in value) {
-      value = value[k];
+    if (value && typeof value === 'object' && value !== null && k in value) {
+      value = (value as Record<string, unknown>)[k];
     } else {
       // Fallback to English if key not found
       value = translations['en'];
       for (const fallbackKey of keys) {
-        if (value && typeof value === 'object' && fallbackKey in value) {
-          value = value[fallbackKey];
+        if (value && typeof value === 'object' && value !== null && fallbackKey in value) {
+          value = (value as Record<string, unknown>)[fallbackKey];
         } else {
           return fallback || key;
         }

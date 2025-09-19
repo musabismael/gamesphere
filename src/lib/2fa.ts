@@ -79,10 +79,15 @@ export async function verifyTwoFactorToken(
   }
 
   // Check backup codes
-  const backupCodeIndex = user.backupCodes.indexOf(token);
+  if (!user.backupCodes || !Array.isArray(user.backupCodes)) {
+    return { isValid: false };
+  }
+  
+  const backupCodes = user.backupCodes as string[];
+  const backupCodeIndex = backupCodes.indexOf(token);
   if (backupCodeIndex !== -1) {
     // Remove used backup code
-    const newBackupCodes = [...user.backupCodes];
+    const newBackupCodes = [...backupCodes];
     newBackupCodes.splice(backupCodeIndex, 1);
 
     await prisma.user.update({

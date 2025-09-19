@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { AlertTriangle, Home, ArrowLeft, Shield, Lock, User } from 'lucide-react';
 import { usePermissions } from '@/hooks/use-permissions';
 
-export default function UnauthorizedPage() {
+function UnauthorizedContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { userRole, isAuthenticated } = usePermissions();
@@ -131,5 +131,29 @@ export default function UnauthorizedPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function UnauthorizedPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+        <Card className="w-full max-w-md bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-500/20">
+              <AlertTriangle className="h-8 w-8 text-blue-400" />
+            </div>
+            <CardTitle className="text-2xl font-bold text-white">
+              Loading...
+            </CardTitle>
+            <CardDescription className="text-gray-400">
+              Please wait while we load the page.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    }>
+      <UnauthorizedContent />
+    </Suspense>
   );
 }
