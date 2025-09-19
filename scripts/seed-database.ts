@@ -313,6 +313,20 @@ async function main() {
     for (let i = 0; i < 50; i++) {
       const randomUser = allUsers[Math.floor(Math.random() * allUsers.length)];
       const randomGame = allGames[Math.floor(Math.random() * allGames.length)];
+      
+      // Check if this user already reviewed this game
+      const existingReview = await prisma.review.findFirst({
+        where: {
+          userId: randomUser.id,
+          gameId: randomGame.id
+        }
+      });
+      
+      if (existingReview) {
+        console.log(`Skipping duplicate review for user ${randomUser.id} and game ${randomGame.id}`);
+        continue;
+      }
+      
       const randomReview = mockData.generateRandomReview(randomUser.id, randomUser as any, randomGame.id, randomGame as any);
       
       await prisma.review.create({
