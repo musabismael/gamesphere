@@ -64,8 +64,18 @@ export default withAuth(
     if (
       pathname.startsWith('/_next/') ||
       pathname.startsWith('/static/') ||
-      pathname.includes('.') ||
-      pathname === '/favicon.ico'
+      pathname.startsWith('/icons/') ||
+      pathname.startsWith('/characters/') ||
+      pathname === '/favicon.ico' ||
+      pathname === '/manifest.json' ||
+      pathname === '/sw.js' ||
+      pathname.endsWith('.svg') ||
+      pathname.endsWith('.png') ||
+      pathname.endsWith('.jpg') ||
+      pathname.endsWith('.jpeg') ||
+      pathname.endsWith('.gif') ||
+      pathname.endsWith('.webp') ||
+      pathname.endsWith('.ico')
     ) {
       return NextResponse.next();
     }
@@ -99,6 +109,8 @@ export default withAuth(
           '/signup',
           '/forgot-password',
           '/game',
+          '/manifest.json',
+          '/sw.js',
           '/api/auth',
           '/api/community',
           '/api/genres',
@@ -232,8 +244,15 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder
+     * - public folder files
+     * - static assets
      */
-    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
+    '/admin/:path*',
+    '/api/:path*',
+    '/developer/:path*',
+    '/dashboard/:path*',
+    '/profile/:path*',
+    '/settings/:path*',
+    '/upload-game/:path*',
   ],
 };
