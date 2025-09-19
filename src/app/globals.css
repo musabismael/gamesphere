@@ -1,26 +1,266 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Dark theme as default - no light theme to prevent hydration mismatches */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 262.1 83.3% 57.8%;
+    --radius: 0.5rem;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--font-poppins), var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* RTL Support */
+  [dir="rtl"] {
+    text-align: right;
+  }
+
+  [dir="rtl"] .flex {
+    flex-direction: row-reverse;
+  }
+
+  [dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: 1;
+    margin-right: calc(0.5rem * var(--tw-space-x-reverse));
+    margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
+  }
+
+  [dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: 1;
+    margin-right: calc(1rem * var(--tw-space-x-reverse));
+    margin-left: calc(1rem * calc(1 - var(--tw-space-x-reverse)));
+  }
+
+  [dir="rtl"] .space-x-6 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: 1;
+    margin-right: calc(1.5rem * var(--tw-space-x-reverse));
+    margin-left: calc(1.5rem * calc(1 - var(--tw-space-x-reverse)));
+  }
+
+  [dir="rtl"] .ml-2 {
+    margin-left: 0;
+    margin-right: 0.5rem;
+  }
+
+  [dir="rtl"] .mr-2 {
+    margin-right: 0;
+    margin-left: 0.5rem;
+  }
+
+  [dir="rtl"] .ml-4 {
+    margin-left: 0;
+    margin-right: 1rem;
+  }
+
+  [dir="rtl"] .mr-4 {
+    margin-right: 0;
+    margin-left: 1rem;
+  }
+
+  [dir="rtl"] .pl-10 {
+    padding-left: 0;
+    padding-right: 2.5rem;
+  }
+
+  [dir="rtl"] .pr-4 {
+    padding-right: 0;
+    padding-left: 1rem;
+  }
+
+  [dir="rtl"] .text-left {
+    text-align: right;
+  }
+
+  [dir="rtl"] .text-right {
+    text-align: left;
+  }
+  
+  /* Typography hierarchy */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-montserrat), var(--font-poppins), var(--font-inter), system-ui, sans-serif;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.05em;
+  }
+  
+  h2 {
+    font-size: 2rem;
+    font-weight: 600;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  h4 {
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+  
+  h5 {
+    font-size: 1.125rem;
+    font-weight: 500;
+  }
+  
+  h6 {
+    font-size: 1rem;
+    font-weight: 500;
+  }
+  
+  p {
+    line-height: 1.6;
+    font-family: var(--font-source-sans), var(--font-open-sans), var(--font-inter), system-ui, sans-serif;
+  }
+  
+  /* Arabic text support */
+  [dir="rtl"] {
+    font-family: var(--font-cairo), var(--font-noto-arabic), "Arial", "Tahoma", sans-serif;
+  }
+  
+  [lang="ar"] {
+    font-family: var(--font-cairo), var(--font-noto-arabic), "Arial", "Tahoma", sans-serif;
+  }
+  
+  /* Japanese text support */
+  [lang="ja"] {
+    font-family: var(--font-noto-jp), "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+  }
+  
+  /* Korean text support */
+  [lang="ko"] {
+    font-family: var(--font-noto-kr), "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  }
+  
+  /* Chinese Simplified text support */
+  [lang="zh-CN"] {
+    font-family: var(--font-noto-sc), "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  }
+  
+  /* Chinese Traditional text support */
+  [lang="zh-TW"] {
+    font-family: var(--font-noto-tc), "PingFang TC", "Hiragino Sans", "Microsoft JhengHei", sans-serif;
+  }
+  
+  /* Thai text support */
+  [lang="th"] {
+    font-family: var(--font-noto-thai), "Sukhumvit Set", "Tahoma", sans-serif;
+  }
+  
+  /* Hindi/Devanagari text support */
+  [lang="hi"] {
+    font-family: var(--font-noto-devanagari), "Mangal", "Arial Unicode MS", sans-serif;
+  }
+  
+  /* Hebrew text support */
+  [lang="he"] {
+    font-family: var(--font-noto-hebrew), "Arial", "Tahoma", sans-serif;
+  }
+  
+  /* Georgian text support */
+  [lang="ka"] {
+    font-family: var(--font-noto-georgian), "Arial", "Tahoma", sans-serif;
+  }
+  
+  /* Armenian text support */
+  [lang="hy"] {
+    font-family: var(--font-noto-armenian), "Arial", "Tahoma", sans-serif;
+  }
+  
+  /* Font utility classes */
+  .font-display {
+    font-family: var(--font-montserrat), var(--font-poppins), var(--font-inter), system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+  
+  .font-body {
+    font-family: var(--font-source-sans), var(--font-open-sans), var(--font-inter), system-ui, sans-serif;
+    line-height: 1.6;
+  }
+  
+  .font-mono {
+    font-family: "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Source Code Pro", monospace;
+  }
+  
+  .font-arabic {
+    font-family: var(--font-cairo), var(--font-noto-arabic), "Arial", "Tahoma", sans-serif;
+  }
+  
+  .font-english {
+    font-family: var(--font-poppins), var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  
+  .font-japanese {
+    font-family: var(--font-noto-jp), "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+  }
+  
+  .font-korean {
+    font-family: var(--font-noto-kr), "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  }
+  
+  .font-chinese-simplified {
+    font-family: var(--font-noto-sc), "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  }
+  
+  .font-chinese-traditional {
+    font-family: var(--font-noto-tc), "PingFang TC", "Hiragino Sans", "Microsoft JhengHei", sans-serif;
+  }
+  
+  .font-thai {
+    font-family: var(--font-noto-thai), "Sukhumvit Set", "Tahoma", sans-serif;
+  }
+  
+  .font-hindi {
+    font-family: var(--font-noto-devanagari), "Mangal", "Arial Unicode MS", sans-serif;
+  }
+  
+  .font-hebrew {
+    font-family: var(--font-noto-hebrew), "Arial", "Tahoma", sans-serif;
+  }
+  
+  .font-georgian {
+    font-family: var(--font-noto-georgian), "Arial", "Tahoma", sans-serif;
+  }
+  
+  .font-armenian {
+    font-family: var(--font-noto-armenian), "Arial", "Tahoma", sans-serif;
+  }
 }

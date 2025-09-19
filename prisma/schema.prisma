@@ -1,0 +1,451 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // For credential-based authentication
+  role          UserRole  @default(PLAYER)
+  coins         Int       @default(0)
+  level         Int       @default(1)
+  experience    Int       @default(0)
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret String?
+  backupCodes   Json      @default("[]")
+  lastLogin     DateTime?
+  loginAttempts Int       @default(0)
+  lockedUntil   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  games         Game[]
+  reviews       Review[]
+  comments      Comment[]
+  achievements  UserAchievement[]
+  playSessions  PlaySession[]
+  gameProgress  GameProgress[]
+  notifications Notification[]
+  communityMemberships CommunityMembership[]
+  auditLogs     AuditLog[]
+  payments      Payment[]
+  subscriptions Subscription[]
+  wallet        Wallet?
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Game {
+  id              String      @id @default(cuid())
+  title           String
+  description     String
+  shortDescription String?
+  thumbnail       String?
+  banner          String?
+  gameFile        String      // URL to the game file
+  gameType        GameType
+  engine          GameEngine
+  genre           Json      @default("[]")
+  tags            Json      @default("[]")
+  isPublished     Boolean     @default(false)
+  isFeatured      Boolean     @default(false)
+  isKidsSafe      Boolean     @default(false)
+  ageRating       Int?        // 3, 7, 12, 16, 18
+  playCount       Int         @default(0)
+  totalPlayTime   Int         @default(0) // in minutes
+  averageRating   Float       @default(0)
+  totalRatings    Int         @default(0)
+  downloadCount   Int         @default(0)
+  fileSize        Int?        // in bytes
+  version         String      @default("1.0.0")
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  publishedAt     DateTime?
+
+  developerId     String
+  developer       User        @relation(fields: [developerId], references: [id], onDelete: Cascade)
+  
+  reviews         Review[]
+  comments        Comment[]
+  playSessions    PlaySession[]
+  gameProgress    GameProgress[]
+  achievements    Achievement[]
+  analytics       GameAnalytics[]
+  monetization    GameMonetization?
+  payments        Payment[]
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      // 1-5 stars
+  content   String?
+  isVerified Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  isEdited  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+}
+
+model Achievement {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  icon        String?
+  points      Int      @default(10)
+  isSecret    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  gameId      String
+  game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  id            String     @id @default(cuid())
+  unlockedAt    DateTime   @default(now())
+
+  userId        String
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+}
+
+model PlaySession {
+  id        String   @id @default(cuid())
+  startTime DateTime @default(now())
+  endTime   DateTime?
+  duration  Int?     // in minutes
+  score     Int?
+  level     Int?
+  isCompleted Boolean @default(false)
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+}
+
+model GameProgress {
+  id        String   @id @default(cuid())
+  progress  Json     // Flexible JSON for different game types
+  lastPlayed DateTime @default(now())
+  isCompleted Boolean @default(false)
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId])
+}
+
+model GameAnalytics {
+  id        String   @id @default(cuid())
+  date      DateTime @default(now())
+  playCount Int      @default(0)
+  playTime  Int      @default(0) // in minutes
+  revenue   Float    @default(0)
+  adViews   Int      @default(0)
+  adClicks  Int      @default(0)
+
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+}
+
+model GameMonetization {
+  id              String  @id @default(cuid())
+  hasAds          Boolean @default(false)
+  adFrequency     Int?    // minutes between ads
+  hasInAppPurchases Boolean @default(false)
+  price           Float?  // for premium games
+  currency        String  @default("USD")
+  revenueShare    Float   @default(0.7) // 70% to developer
+
+  gameId          String  @unique
+  game            Game    @relation(fields: [gameId], references: [id], onDelete: Cascade)
+}
+
+model Community {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  genre       GameGenre
+  isPublic    Boolean  @default(true)
+  memberCount Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  members     CommunityMembership[]
+}
+
+model CommunityMembership {
+  id          String   @id @default(cuid())
+  joinedAt    DateTime @default(now())
+  role        CommunityRole @default(MEMBER)
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  communityId String
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, communityId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  title     String
+  content   String
+  type      NotificationType
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  action      String   // CREATE, UPDATE, DELETE, LOGIN, LOGOUT, etc.
+  resource    String   // USER, GAME, REVIEW, etc.
+  resourceId  String?  // ID of the affected resource
+  details     Json?    // Additional details about the action
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  amount          Float
+  currency        String        @default("USD")
+  status          PaymentStatus @default(PENDING)
+  paymentMethod   String?       // stripe, paypal, etc.
+  paymentIntentId String?       // Stripe payment intent ID
+  transactionId   String?       // External transaction ID
+  description     String?
+  metadata        Json?         // Additional payment data
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId          String?
+  game            Game?         @relation(fields: [gameId], references: [id], onDelete: SetNull)
+}
+
+model Subscription {
+  id              String             @id @default(cuid())
+  status          SubscriptionStatus @default(ACTIVE)
+  plan            String             // premium, pro, etc.
+  price           Float
+  currency        String             @default("USD")
+  interval        String             // monthly, yearly
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean          @default(false)
+  stripeSubscriptionId String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  userId          String
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Wallet {
+  id        String   @id @default(cuid())
+  balance   Float    @default(0)
+  currency  String   @default("USD")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions WalletTransaction[]
+}
+
+model WalletTransaction {
+  id          String                @id @default(cuid())
+  amount      Float
+  type        WalletTransactionType
+  description String?
+  metadata    Json?
+  createdAt   DateTime              @default(now())
+
+  walletId    String
+  wallet      Wallet                @relation(fields: [walletId], references: [id], onDelete: Cascade)
+}
+
+enum UserRole {
+  PLAYER
+  DEVELOPER
+  ADMIN
+  MODERATOR
+}
+
+enum GameType {
+  HTML5
+  WEBGL
+  UNITY_WEB
+  GODOT_WEB
+  PHASER
+  PIXIJS
+  CONSTRUCT3
+  GDEVELOP
+}
+
+enum GameEngine {
+  HTML5
+  WEBGL
+  UNITY
+  GODOT
+  PHASER
+  PIXIJS
+  CONSTRUCT3
+  GDEVELOP
+  CUSTOM
+}
+
+enum GameGenre {
+  ACTION
+  ADVENTURE
+  PUZZLE
+  STRATEGY
+  SIMULATION
+  SPORTS
+  RACING
+  SHOOTER
+  RPG
+  PLATFORMER
+  CARD
+  BOARD
+  EDUCATIONAL
+  KIDS
+  CASUAL
+  HORROR
+  MUSIC
+  RHYTHM
+  FIGHTING
+  MMO
+  MOBA
+  BATTLE_ROYALE
+  SURVIVAL
+  SANDBOX
+  TOWER_DEFENSE
+  ENDLESS_RUNNER
+  MATCH3
+  WORD
+  TRIVIA
+  OTHER
+}
+
+enum CommunityRole {
+  MEMBER
+  MODERATOR
+  ADMIN
+}
+
+enum NotificationType {
+  ACHIEVEMENT_UNLOCKED
+  GAME_PUBLISHED
+  NEW_REVIEW
+  NEW_COMMENT
+  COINS_EARNED
+  LEVEL_UP
+  GAME_UPDATE
+  COMMUNITY_INVITE
+  SYSTEM
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+  PAST_DUE
+  UNPAID
+}
+
+enum WalletTransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  PAYMENT
+  REFUND
+  REWARD
+  BONUS
+}
